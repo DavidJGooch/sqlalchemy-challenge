@@ -3,18 +3,17 @@
 import numpy as np
 import datetime as dt
 import sqlalchemy
-import flask
-from flask import jsonify
+from flask import Flask, jsonify
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
-from sqlalchemy import create_engine, func
+from sqlalchemy import create_engine, func, desc
 
 
 #################################################
 # Database Setup
 #################################################
 
-engine = create_engine("sqlite:///Resources/hawaii.sqlite")
+engine = create_engine("sqlite:///C:/Users/djgoo/DataAnalysis/sqlalchemy-challenge/SurfsUp/Resources/hawaii.sqlite")
 
 
 # reflect an existing database into a new model
@@ -38,7 +37,7 @@ session = Session(engine)
 # Flask Setup
 #################################################
 
-app = flask(__name__)
+app = Flask(__name__)
 
 
 #################################################
@@ -56,25 +55,67 @@ def welcome():
 @app.route("/api/v1.0/precipitation")
 def precipitation():
     session = Session(engine)
-
+    latest_date = dt.datetime(2017, 8, 23)
+    Year_prior = latest_date - dt.timedelta(days=365)
+    results = session.query(Measurement.date, Measurement.prcp)\
+    .filter(Measurement.date >= Year_prior).order_by(desc(Measurement.date)).all()
+    data = []
+    for date, prcp in results:
+        precip_dict = {}
+        precip_dict["date"] = date
+        precip_dict["precipitation"] = prcp
+        data.append(precip_dict)
+    
+    return jsonify(data)
 session.close()
+
 @app.route("/api/v1.0/stations")
 def stations():
     session = Session(engine)
-
+    session = Session(engine)
+    results = session.query(Station.station).all()
+    stations = []
+    for station in results:
+        stations.append(station)
+        
+    return jsonify(stations)
 session.close()
+
 @app.route("/api/v1.0/tobs")
 def tobs():
     session = Session(engine)
-
+    latest_date = dt.datetime(2017, 8, 23)
+    Year_prior = latest_date - dt.timedelta(days=365)
+    results = session.query(Measurement.tobs).filter(Measurement.station=='USC00519281').filter(Measurement.date >= Year_prior).all()
+    tobs = []
+    for T in results:
+        results.append(tobs)
+    return jsonify(results)
 session.close()
+
 @app.route("/api/v1.0/<start>")
-def temperatures_start(start):
+def start(start):
     session = Session(engine)
-
+    results = session.query(func.min(Measurement.tobs), func.max(Measurement.tobs), func.avg(Measurement.tobs)).filter(Measurement.date >= start).all()
+    tobstemps = []
+    for TT in tobstemps:
+        tobstemps.append(TT[0])
+        tobstemps.append(TT[1])
+        tobstemps.append(TT[2])
+    return jsonify(tobstemps)
 session.close()
-@app.route("/api/v1.0/<start>/<end>")
-def temps_start_end(start, end):
-    session = Session(engine)
 
+@app.route("/api/v1.0/<start>/<end>")
+def start_end(start, end):
+    session = Session(engine)
+    results = session.query(func.min(Measurement.tobs), func.max(Measurement.tobs), func.avg(Measurement.tobs)).filter(Measurement.date >= start).filter(Measurement.date <= end).all()
+    tobstemps = []
+    for TT in tobstemps:
+        tobstemps.append(TT[0])
+        tobstemps.append(TT[1])
+        tobstemps.append(TT[2])
+    return jsonify(tobstemps)
 session = Session(engine)
+
+if __name__ == '__main__':
+    app.run(debug=True)
