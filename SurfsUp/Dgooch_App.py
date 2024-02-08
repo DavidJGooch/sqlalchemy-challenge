@@ -98,10 +98,11 @@ def start(start):
     session = Session(engine)
     results = session.query(func.min(Measurement.tobs), func.max(Measurement.tobs), func.avg(Measurement.tobs)).filter(Measurement.date >= start).all()
     tobstemps = []
-    for TT in tobstemps:
-        tobstemps.append(TT[0])
-        tobstemps.append(TT[1])
-        tobstemps.append(TT[2])
+    for tmin, tavg, tmax in results:
+        tob_dict = {}
+        tob_dict["min_temps"] = tmin
+        tob_dict["avg_temps"] = tavg
+        tob_dict["max_temps"] = tmax
     return jsonify(tobstemps)
 session.close()
 
@@ -110,10 +111,11 @@ def start_end(start, end):
     session = Session(engine)
     results = session.query(func.min(Measurement.tobs), func.max(Measurement.tobs), func.avg(Measurement.tobs)).filter(Measurement.date >= start).filter(Measurement.date <= end).all()
     tobstemps = []
-    for TT in tobstemps:
-        tobstemps.append(TT[0])
-        tobstemps.append(TT[1])
-        tobstemps.append(TT[2])
+    for tmin, tavg, tmax in results:
+        tob_dict = {}
+        tob_dict["min_temps"] = tmin
+        tob_dict["avg_temps"] = tavg
+        tob_dict["max_temps"] = tmax
     return jsonify(tobstemps)
 session = Session(engine)
 
